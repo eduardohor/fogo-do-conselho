@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Client\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
+use App\Filament\Client\Resources\UserResource\Pages;
+use App\Filament\Client\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -17,12 +17,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    public static function getModelLabel(): string
-    {
-        return __('User');
-    }
-
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
@@ -34,18 +29,11 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('email')
                     ->email()
                     ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                    ->maxLength(255),
+                Forms\Components\DateTimePicker::make('email_verified_at'),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->required(fn(string $operation): bool => $operation === 'create')
-                    ->dehydrated(fn(?string $state) => filled($state))
-                    ->confirmed()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('password_confirmation')
-                    ->password()
-                    ->requiredWith('password')
-                    ->dehydrated(false)
+                    ->required()
                     ->maxLength(255),
             ]);
     }
@@ -58,8 +46,15 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('email_verified_at')
+                    ->dateTime()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('d/m/Y H:i:s')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

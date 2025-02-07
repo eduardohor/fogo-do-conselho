@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
+use App\Filament\Resources\TenantResource\Pages;
+use App\Filament\Resources\TenantResource\RelationManagers;
+use App\Models\Tenant;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,16 +13,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class UserResource extends Resource
+class TenantResource extends Resource
 {
-    protected static ?string $model = User::class;
+    protected static ?string $model = Tenant::class;
 
-    public static function getModelLabel(): string
-    {
-        return __('User');
-    }
-
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
@@ -34,19 +29,13 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('email')
                     ->email()
                     ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->required(fn(string $operation): bool => $operation === 'create')
-                    ->dehydrated(fn(?string $state) => filled($state))
-                    ->confirmed()
+                    ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('password_confirmation')
-                    ->password()
-                    ->requiredWith('password')
-                    ->dehydrated(false)
-                    ->maxLength(255),
+                Forms\Components\TextInput::make('domain')
+                    ->required()
             ]);
     }
 
@@ -54,12 +43,21 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('domain')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('d/m/Y H:i:s')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -86,9 +84,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => Pages\ListTenants::route('/'),
+            'create' => Pages\CreateTenant::route('/create'),
+            'edit' => Pages\EditTenant::route('/{record}/edit'),
         ];
     }
 }
